@@ -1,10 +1,10 @@
 import axios from 'axios';
-
+import config from './config.js'
 const axiosInstance = axios.create({
-    baseURL: 'https://randommer.io/api',
+    baseURL: config.randommerApiUrl,
     headers: {
         'Content-Type': 'application/json',
-        'X-Api-Key': '97a73343a39c4d9faa9b466df9078d42'
+        'X-Api-Key': config.randommerApiKey
     }
 });
 

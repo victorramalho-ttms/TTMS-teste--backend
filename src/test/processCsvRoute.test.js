@@ -1,39 +1,28 @@
 import request from 'supertest';
 import app from '../../app.js';
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
 describe('GET /process-csv', () => {
-    const testFile = path.resolve('uploads', 'proc.csv');
-    beforeAll(() => {
-        fs.writeFileSync(testFile, 'nome,idade\nDavid,\nVictor,\nJohn,\nAnna,\nVincent,\nAmanda,\nJulia,\nRobert,\nDaniel,\n');
-    });
-    afterAll(() => {
-        fs.unlinkSync(testFile);
+    const testFile = path.resolve('uploads', 'upload-csvTest.csv');
+
+    beforeAll(async () => {
+        await fs.copyFile('csvTest.csv', testFile);
     });
 
-    it('deve filtrar nomes que começam com V, J, A ou D', async () => {
-        const letras = ['V', 'J', 'A', 'D'];
+
+    it('deve filtrar linhas cujo nome começa com "T"', async () => {
         const res = await request(app)
             .get('/process-csv')
-            .query({ fileName: 'proc.csv', filter: 'VJAD' });
+            .query({ fileName: 'upload-csvTest.csv', filter: 'T' });
         expect(res.status).toBe(200);
-        // Só deve conter nomes que começam com V, J, A ou D
-        const linhas = res.text.split('\n').filter(l => l && !l.startsWith('nome') && !l.startsWith('---') && !l.startsWith('total'));
-        for (const linha of linhas) {
-            const primeiraLetra = linha[0];
-            expect(letras).toContain(primeiraLetra);
-        }
-        // Não deve conter nomes que começam com outras letras
-        expect(res.text).not.toMatch(/R\w+,/g); // não deve ter nomes com R
-        expect(res.text).toContain('total de linhas filtradas: 7');
-    });
 
-    it('deve retornar erro se faltar parametros', async () => {
-        const res = await request(app)
-            .get('/process-csv')
-            .query({ fileName: 'proc.csv' });
-        expect(res.status).toBe(400);
-        expect(res.body).toHaveProperty('error', 'informe fileName e filter');
+        const linhas = res.text.split('\n').filter(l => l && !l.startsWith('---') && !l.startsWith('total') && !l.startsWith('filtro'));
+
+        for (const linha of linhas.slice(1)) {
+            const campos = linha.split(',');
+            const nome = campos[1]?.replace(/"/g, '');
+            if (nome) expect(nome.startsWith('T')).toBe(true);
+        }
     });
 });

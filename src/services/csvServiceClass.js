@@ -1,29 +1,11 @@
-import fs from 'fs';
-import readline from 'readline';
+import fs from 'node:fs/promises';
+import { CsvDomain } from '../domain/csvDomain.js';
 
 export class CsvService {
     async generateFilteredCsvWithStats(filePath, filterText) {
-        const filteredLines = [];
-        let totalLines = 0;
-
-        const stream = fs.createReadStream(filePath);
-        const rl = readline.createInterface({ input: stream });
-
-        for await (const line of rl) {
-            if (line.trim() !== '') {
-                totalLines++;
-                if (line.includes(filterText)) {
-                    filteredLines.push(line);
-                }
-            }
-        }
-
-        const csvContent = filteredLines.join('\n') + '\n\n' +
-            '--- estatísticas ---\n' +
-            `total de linhas no arquivo: ${totalLines}\n` +
-            `total de linhas filtradas: ${filteredLines.length}\n` +
-            `filtro aplicado: "${filterText}"`;
-
-        return csvContent;
+        const fileContent = await fs.readFile(filePath, 'utf-8');
+        const linhas = fileContent.split('\n').filter(l => l.trim() !== '');
+        const csvDomain = new CsvDomain();
+        return csvDomain.generateFilteredCsvWithStats(linhas, filterText);
     }
 }

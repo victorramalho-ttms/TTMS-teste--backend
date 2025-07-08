@@ -1,21 +1,29 @@
 import express from 'express';
-import path from 'path';
-import { CsvService } from '../services/csvServiceClass.js';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { CsvDomain } from '../domain/csvDomain.js';
 
 const router = express.Router();
-const csvService = new CsvService();
 
 router.get('/process-csv', async (request, response) => {
     const { fileName, filter } = request.query;
     if (!fileName || !filter) {
-        return res.status(400).json({ error: 'informe fileName e filter' });
+        return response.status(400).json({ error: 'informe fileName e filter' });
+    }
+    if (!fileName.startsWith('upload-')) {
+        return response.status(400).json({ error: 'arquivo inválido para processamento' });
     }
     const filePath = path.resolve('uploads', fileName);
     try {
-        const result = await csvService.generateFilteredCsvWithStats(filePath, filter);
-        response.setHeader('Content-Disposition', `attachment; filename="${fileName.replace('.csv', '')}-filtered.csv"`);
+        await fs.access(filePath);
+        const fileContent = await fs.readFile(filePath, 'utf-8');
+        const linhas = fileContent.split('\n').filter(l => l.trim() !== '');
+        const csvDomain = new CsvDomain();
+        const result = csvDomain.generateFilteredCsvWithStats(linhas, filter);
+        const filteredFileName = `Filter-${fileName}`;
+        await fs.writeFile(path.resolve('uploads', filteredFileName), result);
+        response.setHeader('Content-Disposition', `attachment; filename="${filteredFileName}"`);
         response.setHeader('Content-Type', 'text/csv');
-        console.log('csv processado com sucesso');
         response.send(result);
     } catch (error) {
         console.error('erro ao processar csv:', error.message);
