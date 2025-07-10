@@ -1,8 +1,8 @@
 import express from 'express';
-import uploadRoute from './src/routes/uploadRoute.js';
-import generateCsvRoute from './src/routes/generateCsv.js';
-import listFilesRoute from './src/routes/listFiles.js';
-import processCsvRoute from './src/routes/processCsv.js';
+import uploadRoute from './routes/uploadRoute.js';
+import generateCsvRoute from './routes/generateCsv.js';
+import listFilesRoute from './routes/listFiles.js';
+import processCsvRoute from './routes/processCsv.js';
 
 const app = express();
 const port = process.env.PORT || 3001;

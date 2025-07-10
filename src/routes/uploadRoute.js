@@ -2,8 +2,10 @@ import express from 'express';
 import multer from 'multer';
 import fs from 'node:fs';
 import path from 'node:path';
+import { FileDomain } from '../domain/domain.js';
 
 const router = express.Router();
+const fileDomain = new FileDomain();
 
 const upload = multer({
     dest: 'uploads/',
@@ -18,21 +20,12 @@ const upload = multer({
 });
 
 router.post('/upload-csv', upload.single('file'), (request, response) => {
-    if (!request.file) {
-        return response.status(400).json({ error: 'nenhum arquivo enviado' });
+    try {
+        const result = fileDomain.handleCsvUpload(request.file);
+        response.json(result);
+    } catch (error) {
+        response.status(400).json({ error: error.message });
     }
-
-    const oldPath = request.file.path;
-    const newFileName = `upload-${request.file.originalname}`;
-    const newPath = path.join(request.file.destination, newFileName);
-
-    fs.renameSync(oldPath, newPath);
-
-    response.json({
-        message: 'upload realizado com sucesso',
-        fileName: newFileName,
-        fileSize: request.file.size
-    });
 });
 
 export default router;

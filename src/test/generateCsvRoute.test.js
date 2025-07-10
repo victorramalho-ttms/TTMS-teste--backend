@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../../app.js';
+import app from '../app.js';
 
 describe('GET /generate-csv', () => {
     it('deve gerar e baixar um arquivo csv', async () => {

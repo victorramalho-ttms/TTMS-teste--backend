@@ -29,7 +29,7 @@ npm run dev
 ## Como rodar os testes
 
 Para rodar todos os testes unitários:
-```bash
+```bash543
 node --experimental-vm-modules node_modules/jest/bin/jest.js
 ```
 
