@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 describe('GET /list-files', () => {
-    const testFile = path.resolve('csvTest.csv');
+    const testFile = path.resolve('src', 'test', 'files', 'csvTest.csv');
     const uploadFile = path.resolve('uploads', 'upload-csvTest.csv');
 
     beforeAll(async () => {
