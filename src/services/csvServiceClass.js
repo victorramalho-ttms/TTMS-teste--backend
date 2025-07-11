@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-import { CsvDomain } from '../domain/csvDomain.js';
+import { CsvDomain } from '../domain/domain.js';
 
 export class CsvService {
     async generateFilteredCsvWithStats(filePath, filterText) {

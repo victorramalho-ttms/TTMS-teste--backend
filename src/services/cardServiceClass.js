@@ -1,5 +1,5 @@
 import axiosInstance from '../utils/axiosInstance.js';
-import { CardDomain } from '../domain/cardDomain.js';
+import { CardDomain } from '../domain/domain.js';
 
 export class CardService {
     async generateVisaCards(quantity = 100) {

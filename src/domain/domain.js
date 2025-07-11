@@ -36,7 +36,7 @@ export class CardDomain {
 
     generateCsvContentFromCards(cardsList) {
         const cardsWithColumns = this.mapCardsToColumns(cardsList);
-        const parser = new Parser({ fields: ['numeroCartao', 'nome', 'validade', 'tipo', 'cvv', 'pin', 'criadoEm'] }); // <-- Adicionado cvv aqui também
+        const parser = new Parser({ fields: ['numeroCartao', 'nome', 'validade', 'tipo', 'cvv', 'pin', 'criadoEm'] });
         const csvContent = parser.parse(cardsWithColumns);
         return { csvContent, cardsWithColumns };
     }
