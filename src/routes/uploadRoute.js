@@ -19,9 +19,9 @@ const upload = multer({
     }
 });
 
-router.post('/upload-csv', upload.single('file'), (request, response) => {
+router.post('/upload-csv', upload.single('file'), async (request, response) => {
     try {
-        const result = fileDomain.handleCsvUpload(request.file);
+        const result = await fileDomain.handleCsvUpload(request.file);
         response.json(result);
     } catch (error) {
         response.status(400).json({ error: error.message });

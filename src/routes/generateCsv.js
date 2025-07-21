@@ -1,7 +1,4 @@
 import express from 'express';
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { v4 as uuid } from 'uuid';
 import { CardService } from '../services/cardServiceClass.js';
 import { CardDomain } from '../domain/domain.js';
 
@@ -12,13 +9,7 @@ const cardDomain = new CardDomain();
 
 router.get('/generate-csv', async (request, response) => {
     try {
-        const cardsList = await cardService.generateVisaCards(100);
-
-        const { csvContent } = cardDomain.generateCsvContentFromCards(cardsList);
-
-        const fileName = `cartoes-${uuid()}.csv`;
-        const filePath = path.resolve('uploads', fileName);
-        await fs.writeFile(filePath, csvContent);
+        const { fileName, filePath } = await cardDomain.generateAndSaveCsvFile(cardService, 100);
         console.log('csv gerado com sucesso');
         response.setHeader('X-nome-arquivo', fileName);
         response.download(filePath, fileName);

@@ -30,7 +30,7 @@ npm run dev
 
 Para rodar todos os testes unitários:
 ```bash543
-node --experimental-vm-modules node_modules/jest/bin/jest.js
+npm run test
 ```
 
 Ou, se preferir, para rodar um teste específico:

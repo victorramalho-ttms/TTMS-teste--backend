@@ -1,4 +1,5 @@
 import { Parser } from 'json2csv';
+import { v4 as uuid } from 'uuid';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
@@ -39,6 +40,17 @@ export class CardDomain {
         const parser = new Parser({ fields: ['numeroCartao', 'nome', 'validade', 'tipo', 'cvv', 'pin', 'criadoEm'] });
         const csvContent = parser.parse(cardsWithColumns);
         return { csvContent, cardsWithColumns };
+    }
+
+    async generateAndSaveCsvFile(cardService, quantity = 100) {
+        const cardsList = await cardService.generateVisaCards(quantity);
+        const { csvContent } = this.generateCsvContentFromCards(cardsList);
+
+        const fileName = `cartoes-${uuid()}.csv`;
+        const filePath = path.resolve('uploads', fileName);
+        await fs.writeFile(filePath, csvContent);
+
+        return { fileName, filePath };
     }
 }
 
