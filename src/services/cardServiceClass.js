@@ -1,12 +1,12 @@
 import axiosInstance from '../utils/axiosInstance.js';
-import { CardDomain } from '../domain/domain.js';
 
 export class CardService {
-    async generateVisaCards(quantity = 100) {
-        const cardDomain = new CardDomain();
-        return cardDomain.mountVisaCardsList(
-            () => axiosInstance.get('/Card', { params: { type: 'Visa' } }),
-            quantity
-        );
+    async fetchVisaCards(quantity = 100) {
+        const cards = [];
+        for (let i = 0; i < quantity; i++) {
+            const response = await axiosInstance.get('/Card', { params: { type: 'Visa' } });
+            cards.push(response.data);
+        }
+        return cards;
     }
 }

@@ -11,10 +11,9 @@ router.get('/process-csv', async (request, response) => {
         return response.status(400).json({ error: 'informe fileName e filter' });
     }
     try {
-        const { result, filteredFileName } = await csvDomain.processCsvFile(fileName, filter, path.resolve('uploads'));
-        response.setHeader('Content-Disposition', `attachment; filename="${filteredFileName}"`);
-        response.setHeader('Content-Type', 'text/csv');
-        response.send(result);
+        const { fileName: filteredFileName, filePath: filteredFilePath } =
+            await csvDomain.processAndSaveFilteredCsv(fileName, filter, path.resolve('uploads'));
+        response.status(200).download(filteredFilePath, filteredFileName);
     } catch (error) {
         console.error('erro ao processar csv:', error.message);
         response.status(500).json({ error: 'falha ao processar arquivo csv' });

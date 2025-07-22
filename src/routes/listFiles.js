@@ -9,7 +9,7 @@ const fileDomain = new FileDomain();
 router.get('/list-files', async (request, response) => {
     try {
         const filesList = await fileDomain.listCsvFiles(uploadsFolder);
-        response.json(filesList);
+        response.status(200).json(filesList);
     } catch (error) {
         response.status(500).json({ error: 'falha ao listar arquivos' });
     }

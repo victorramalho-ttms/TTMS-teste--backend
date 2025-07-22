@@ -1,50 +1,50 @@
-import { Parser } from 'json2csv';
+import { AsyncParser } from '@json2csv/node';
 import { v4 as uuid } from 'uuid';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { CardService } from '../services/cardServiceClass.js';
 
 export class CardDomain {
-    async mountVisaCardsList(apiCallFunction, quantity = 100) {
-        const cardsList = [];
-        for (let i = 0; i < quantity; i++) {
-            try {
-                const response = await apiCallFunction();
-                cardsList.push({ cardNumber: response.data });
-            } catch (error) {
-                throw new Error('api falhou, nao foi possivel obter numero do cartao', error);
-            }
-        }
-        return cardsList;
+    mountVisaCardsList(cardsList) {
+        return cardsList.map(card => ({
+            numeroCartao: card.cardNumber || card.number || '',
+            nome: card.fullName || card.name || '',
+            validade: card.date || card.validade || '',
+            tipo: card.type || 'Visa',
+            cvv: card.cvv || '',
+            pin: card.pin || '',
+            criadoEm: new Date().toISOString()
+        }));
     }
 
     mapCardsToColumns(cardsList) {
-        return cardsList.map(card => {
-            const cardObj = typeof card.cardNumber === 'string'
-                ? JSON.parse(card.cardNumber)
-                : card.cardNumber;
-
-            return {
-                numeroCartao: cardObj.cardNumber,
-                nome: cardObj.fullName,
-                validade: cardObj.date,
-                tipo: cardObj.type,
-                cvv: cardObj.cvv,
-                pin: cardObj.pin,
-                criadoEm: new Date().toISOString()
-            };
-        });
+        return cardsList.map(card => ({
+            numeroCartao: card.numeroCartao || card.cardNumber || card.number || '',
+            nome: card.nome || card.fullName || card.name || '',
+            validade: card.validade || card.date || '',
+            tipo: card.tipo || 'Visa',
+            cvv: card.cvv || '',
+            pin: card.pin || '',
+            criadoEm: card.criadoEm || new Date().toISOString()
+        }));
     }
 
-    generateCsvContentFromCards(cardsList) {
+    async generateCsvContentFromCards(cardsList) {
         const cardsWithColumns = this.mapCardsToColumns(cardsList);
-        const parser = new Parser({ fields: ['numeroCartao', 'nome', 'validade', 'tipo', 'cvv', 'pin', 'criadoEm'] });
-        const csvContent = parser.parse(cardsWithColumns);
-        return { csvContent, cardsWithColumns };
+        const fields = ['numeroCartao', 'nome', 'validade', 'tipo', 'cvv', 'pin', 'criadoEm'];
+        const opts = { fields };
+        const parser = new AsyncParser(opts);
+        return parser.parse(cardsWithColumns).promise().then(csvContent => ({
+            csvContent,
+            cardsWithColumns
+        }));
     }
 
-    async generateAndSaveCsvFile(cardService, quantity = 100) {
-        const cardsList = await cardService.generateVisaCards(quantity);
-        const { csvContent } = this.generateCsvContentFromCards(cardsList);
+    async generateAndSaveCsvFile(quantity = 100) {
+        const cardService = new CardService();
+        const cardsRaw = await cardService.fetchVisaCards(quantity);
+        const cardsList = this.mountVisaCardsList(cardsRaw);
+        const { csvContent } = await this.generateCsvContentFromCards(cardsList);
 
         const fileName = `cartoes-${uuid()}.csv`;
         const filePath = path.resolve('uploads', fileName);
@@ -65,6 +65,12 @@ export class CsvDomain {
         const outputPath = path.resolve(uploadsFolder, filteredFileName);
         await fs.writeFile(outputPath, result);
         return { result, filteredFileName };
+    }
+
+    async processAndSaveFilteredCsv(fileName, filter, uploadsFolder = 'uploads') {
+        const { filteredFileName } = await this.processCsvFile(fileName, filter, uploadsFolder);
+        const filteredFilePath = path.resolve(uploadsFolder, filteredFileName);
+        return { fileName: filteredFileName, filePath: filteredFilePath };
     }
 
     generateFilteredCsvWithStats(lines, filterText) {
@@ -108,7 +114,7 @@ export class FileDomain {
             })
         );
 
-        filesList.sort((a, b) => b.updatedAt - a.updatedAt);
+        filesList.sort((firstFile, secondFile) => secondFile.updatedAt - firstFile.updatedAt);
         return filesList;
     }
 

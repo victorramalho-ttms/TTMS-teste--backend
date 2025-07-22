@@ -1,6 +1,5 @@
 import express from 'express';
 import multer from 'multer';
-import fs from 'node:fs';
 import path from 'node:path';
 import { FileDomain } from '../domain/domain.js';
 
@@ -22,7 +21,7 @@ const upload = multer({
 router.post('/upload-csv', upload.single('file'), async (request, response) => {
     try {
         const result = await fileDomain.handleCsvUpload(request.file);
-        response.json(result);
+        response.status(200).json(result);
     } catch (error) {
         response.status(400).json({ error: error.message });
     }
