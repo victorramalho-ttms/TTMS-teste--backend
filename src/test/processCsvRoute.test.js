@@ -1,6 +1,5 @@
 import request from 'supertest';
 import app from '../app.js';
-import fs from 'node:fs/promises';
 import path from 'node:path';
 
 describe('GET /process-csv', () => {

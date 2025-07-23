@@ -18,15 +18,21 @@ export class CardDomain {
     }
 
     mapCardsToColumns(cardsList) {
-        return cardsList.map(card => ({
-            numeroCartao: card.numeroCartao || card.cardNumber || card.number || '',
-            nome: card.nome || card.fullName || card.name || '',
-            validade: card.validade || card.date || '',
-            tipo: card.tipo || 'Visa',
-            cvv: card.cvv || '',
-            pin: card.pin || '',
-            criadoEm: card.criadoEm || new Date().toISOString()
-        }));
+        return cardsList.map(card => {
+            const cardObj = typeof card.cardNumber === 'string'
+                ? JSON.parse(card.cardNumber)
+                : card.cardNumber;
+
+            return {
+                numeroCartao: cardObj.cardNumber,
+                nome: cardObj.fullName,
+                validade: cardObj.date,
+                tipo: cardObj.type,
+                cvv: cardObj.cvv,
+                pin: cardObj.pin,
+                criadoEm: new Date().toISOString()
+            };
+        });
     }
 
     async generateCsvContentFromCards(cardsList) {

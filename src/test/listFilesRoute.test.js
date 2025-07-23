@@ -20,6 +20,6 @@ describe('GET /list-files', () => {
         const res = await request(app).get('/list-files');
         expect(res.status).toBe(200);
         expect(Array.isArray(res.body)).toBe(true);
-        expect(res.body.some(f => f.fileName === 'upload-csvTest.csv')).toBe(true);
+        expect(res.body.some(file => file.fileName === 'upload-csvTest.csv')).toBe(true);
     });
 });
