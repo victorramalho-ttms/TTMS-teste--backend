@@ -26,5 +26,10 @@ describe('GET /process-csv', () => {
         for (const linha of linhas.slice(1)) {
             expect(linha.includes('T')).toBe(true);
         }
+
+        const estatisticas = res.text.split('\n').find(l => l.startsWith('total de linhas filtradas:'));
+        const totalFiltradas = parseInt(estatisticas.split(':')[1].trim(), 10);
+        expect(totalFiltradas).toBe(linhas.length - 1);
+        expect(linhas[0]).toContain('numeroCartao');
     });
 });

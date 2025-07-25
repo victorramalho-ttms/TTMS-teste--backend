@@ -16,5 +16,9 @@ describe('Upload', () => {
         expect(res.body.message).toBe('upload realizado com sucesso');
         const exists = await fs.stat(uploadedFile).then(() => true).catch(() => false);
         expect(exists).toBe(true);
+
+        const original = await fs.readFile(testFile, 'utf-8');
+        const uploaded = await fs.readFile(uploadedFile, 'utf-8');
+        expect(uploaded).toBe(original);
     });
-}); 
+});
